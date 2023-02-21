@@ -8,18 +8,24 @@ from passlib.hash import bcrypt
 from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 
+from database import Session, get_session
 from models import orm_models, schemes
-from database import get_session, Session
 from settings import settings
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/users/login')
+
+
+def get_user(session, user_id: int) -> orm_models.User:
+    user = session.query(orm_models.User). \
+        filter(orm_models.User.user_id == user_id).first()
+    return user
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> orm_models.User:
     return UserServices.verify_token(token)
 
 
-class UserServices:
+class UserServicesMixin:
 
     @classmethod
     def verify_token(cls, token: str) -> orm_models.User:
@@ -50,12 +56,10 @@ class UserServices:
 
     @classmethod
     def is_valid_password(cls, password, password_hash):
-
         return bcrypt.verify(password, password_hash)
 
     @classmethod
     def get_hash_password(cls, password) -> str:
-
         return bcrypt.hash(password)
 
     @classmethod
@@ -81,8 +85,10 @@ class UserServices:
 
         return schemes.Token(access_token=token)
 
-    def __init__(self, session: Session = Depends(get_session)):
 
+class UserServices(UserServicesMixin):
+
+    def __init__(self, session: Session = Depends(get_session)):
         self.session = session
 
     def create_user(self, user_data: schemes.CreateUser) -> schemes.Token:
@@ -116,67 +122,7 @@ class UserServices:
             filter(orm_models.User.username == username)\
             .first()
 
-        if not user:
-            raise exception
-
-        if not self.is_valid_password(password, user.password):
+        if not user or not self.is_valid_password(password, user.password):
             raise exception
 
         return self.create_jwt_token(user)
-
-    def get_user_balance(self, user_id) -> schemes.Balance:
-        user = self._get_user(user_id)
-        balance = schemes.Balance(
-            user_id=user.user_id,
-            balance=user.balance,
-        )
-        return balance
-
-    def top_up_balance(self, user_id, body) -> schemes.Balance:
-
-        amount = body.get('amount')
-        if amount is None or amount <= 0:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail='Amount cant be lower or equal zero'
-            )
-        user = self._get_user(user_id)
-        user.balance += amount
-        return schemes.Balance(user_id=user_id, balance=user.balance)
-
-    def transfer(self, user_id, body) -> schemes.Transfer:
-        transfer_user_id = body.get('accountToId')
-        amount_transfer_money = body.get('amount')
-
-        if transfer_user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail='Incorrect transfer user id'
-            )
-        user = self._get_user(user_id)
-
-        if amount_transfer_money > user.balance:
-            raise HTTPException(
-                status_code=status.HTTP_402_PAYMENT_REQUIRED,
-                detail='Not enough money for transfer'
-            )
-
-        user2 = self._get_user(transfer_user_id)
-        if user2 is None:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail='User for transfer was not found',
-            )
-        user.balance -= amount_transfer_money
-        user2.balance += amount_transfer_money
-
-        return schemes.Transfer(
-            author_id=user_id,
-            credited_user_id=transfer_user_id,
-            money_amount=amount_transfer_money,
-        )
-
-    def _get_user(self, user_id) -> orm_models.User:
-        user = self.session.query(orm_models.User). \
-            filter(orm_models.User.user_id == user_id).first()
-        return user

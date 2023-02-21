@@ -1,8 +1,13 @@
-from fastapi import APIRouter, Depends, status, Body
+from fastapi import APIRouter, Body, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import ValidationError
 
+from api import get_current_user
+from api.services.transactions import Transactions
+from api.services.operations import Operations
+from api.services.users import UserServices
 from models import schemes
-from api.services import UserServices, get_current_user
+
 
 router = APIRouter(
     prefix='/users',
@@ -46,22 +51,31 @@ async def login_user(
 )
 async def get_user_balance(
         user: schemes.User = Depends(get_current_user),
-        user_services: UserServices = Depends(UserServices),
+        transactions: Transactions = Depends(Transactions),
 ):
-    return user_services.get_user_balance(user.user_id)
+    return transactions.get_balance(user.user_id)
 
 
 @router.patch(
-    path='/balance',
+    path='/balance/payin',
     status_code=status.HTTP_200_OK,
 )
-async def top_up_balance(
+async def pay_in(
     user: schemes.User = Depends(get_current_user),
-    user_service: UserServices = Depends(UserServices),
-    body: dict = Body()
-) -> schemes.Balance:
-
-    return user_service.top_up_balance(user.user_id, body)
+    transactions: Transactions = Depends(Transactions),
+    operations: Operations = Depends(Operations),
+    body: dict = Body(),
+):
+    """Request body must include fields:
+    amount: int = <amount of money to payin>,
+    type: str = payin
+    """
+    try:
+        balance = transactions.pay_in(user.user_id, body)
+        operations.add_operations(user.user_id, body, status='SUCCEEDED')
+        return balance
+    except ValidationError:
+        pass
 
 
 @router.post(
@@ -69,10 +83,31 @@ async def top_up_balance(
     status_code=status.HTTP_200_OK,
     response_model=schemes.Transfer
 )
-async def money_transfer(
+async def transfer(
         user: schemes.User = Depends(get_current_user),
-        user_service: UserServices = Depends(UserServices),
+        transactions: Transactions = Depends(Transactions),
         body: dict = Body(),
 ) -> schemes.Transfer:
+    """Request body must include fields:
+        accountToId: int = <recipient id>,
+        amount: int = <amount of money to payin>
+        type: str = transfer
+        """
+    return transactions.transfer(user.user_id, body)
 
-    return user_service.transfer(user.user_id, body)
+
+@router.post(
+    path='/balance/payout',
+    status_code=status.HTTP_200_OK,
+    response_model=schemes.Balance,
+)
+def pay_out(
+    user: schemes.User = Depends(get_current_user),
+    transactions: Transactions = Depends(Transactions),
+    body: dict = Body(),
+) -> schemes.Balance:
+    """Request body must include fields:
+        amount: int = <amount of money to payin>,
+        type: str = payout
+    """
+    return transactions.pay_out(user.user_id, body)

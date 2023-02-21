@@ -6,3 +6,9 @@ p_install:
 
 install:
 	pip install -r requirements.txt
+
+sort:
+	poetry run isort .
+
+lint:
+	poetry run flake8
