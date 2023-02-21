@@ -15,14 +15,14 @@ from settings import settings
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/users/login')
 
 
-def get_current_user(token: str = Depends(oauth2_scheme)) -> users.User:
+def get_current_user(token: str = Depends(oauth2_scheme)) -> orm_models.User:
     return UserServices.verify_token(token)
 
 
 class UserServices:
 
     @classmethod
-    def verify_token(cls, token: str) -> users.User:
+    def verify_token(cls, token: str) -> orm_models.User:
 
         exception = HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -59,7 +59,7 @@ class UserServices:
         return bcrypt.hash(password)
 
     @classmethod
-    def create_jwt_token(cls, user_data: users.User) -> schemes.Token:
+    def create_jwt_token(cls, user_data: orm_models.User) -> schemes.Token:
 
         user = schemes.User.from_orm(user_data)
         time_now = datetime.utcnow()
@@ -86,7 +86,7 @@ class UserServices:
         self.session = session
 
     def create_user(self, user_data: schemes.CreateUser) -> schemes.Token:
-        user = users.User(
+        user = orm_models.User(
             username=user_data.username,
             password=self.get_hash_password(user_data.password),
         )
@@ -111,9 +111,9 @@ class UserServices:
                 headers={'WWW-Authenticate': 'Bearer'},
             )
 
-        user: users.User = self.session.\
-            query(users.User).\
-            filter(users.User.username == username)\
+        user: orm_models.User = self.session.\
+            query(orm_models.User).\
+            filter(orm_models.User.username == username)\
             .first()
 
         if not user:
@@ -154,11 +154,13 @@ class UserServices:
                 detail='Incorrect transfer user id'
             )
         user = self._get_user(user_id)
+
         if amount_transfer_money > user.balance:
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
                 detail='Not enough money for transfer'
             )
+
         user2 = self._get_user(transfer_user_id)
         if user2 is None:
             raise HTTPException(
@@ -174,7 +176,7 @@ class UserServices:
             money_amount=amount_transfer_money,
         )
 
-    def _get_user(self, user_id) -> users.User:
-        user = self.session.query(users.User). \
-            filter(users.User.user_id == user_id).first()
+    def _get_user(self, user_id) -> orm_models.User:
+        user = self.session.query(orm_models.User). \
+            filter(orm_models.User.user_id == user_id).first()
         return user
