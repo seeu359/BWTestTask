@@ -1,13 +1,11 @@
-from fastapi import APIRouter, Body, Depends, status
+from fastapi import APIRouter, Body, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import ValidationError
 
 from api import get_current_user
-from api.services.transactions import Transactions
 from api.services.operations import Operations
+from api.services.transactions import Transactions
 from api.services.users import UserServices
 from models import schemes
-
 
 router = APIRouter(
     prefix='/users',
@@ -70,12 +68,9 @@ async def pay_in(
     amount: int = <amount of money to payin>,
     type: str = payin
     """
-    try:
-        balance = transactions.pay_in(user.user_id, body)
-        operations.add_operations(user.user_id, body, status='SUCCEEDED')
-        return balance
-    except ValidationError:
-        pass
+    balance = transactions.pay_in(user.user_id, body)
+    operations.add_operations(user.user_id, body)
+    return balance
 
 
 @router.post(
@@ -84,16 +79,23 @@ async def pay_in(
     response_model=schemes.Transfer
 )
 async def transfer(
-        user: schemes.User = Depends(get_current_user),
-        transactions: Transactions = Depends(Transactions),
-        body: dict = Body(),
+    user: schemes.User = Depends(get_current_user),
+    transactions: Transactions = Depends(Transactions),
+    operations: Operations = Depends(Operations),
+    body: dict = Body(),
 ) -> schemes.Transfer:
     """Request body must include fields:
         accountToId: int = <recipient id>,
         amount: int = <amount of money to payin>
         type: str = transfer
         """
-    return transactions.transfer(user.user_id, body)
+    try:
+        _transfer = transactions.transfer(user.user_id, body)
+        operations.add_operations(user.user_id, body)
+        return _transfer
+
+    except HTTPException as exc:
+        operations.add_operations(user.user_id, body, exc=exc)
 
 
 @router.post(
@@ -104,10 +106,17 @@ async def transfer(
 def pay_out(
     user: schemes.User = Depends(get_current_user),
     transactions: Transactions = Depends(Transactions),
+    operations: Operations = Depends(Operations),
     body: dict = Body(),
 ) -> schemes.Balance:
     """Request body must include fields:
         amount: int = <amount of money to payin>,
         type: str = payout
     """
-    return transactions.pay_out(user.user_id, body)
+    try:
+        balance = transactions.pay_out(user.user_id, body)
+        operations.add_operations(user.user_id, body)
+        return balance
+
+    except HTTPException as exc:
+        operations.add_operations(user.user_id, body, exc=exc)
