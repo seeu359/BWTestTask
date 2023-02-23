@@ -5,17 +5,12 @@ from sqlalchemy.orm import sessionmaker
 from config import settings
 from models import Base
 
-engine = create_engine(
-        settings.TEST_DATABASE_URL, connect_args={"check_same_thread": False}
-    )
-
-
-@pytest.fixture()
-def db_service():
-    Base.metadata.create_all(engine)
-
 
 def get_mock_session():
+    engine = create_engine(
+        settings.TEST_DATABASE_URL, connect_args={"check_same_thread": False}
+    )
+    Base.metadata.create_all(engine)
 
     test_session = sessionmaker(
         autocommit=False,
@@ -30,5 +25,7 @@ def get_mock_session():
 class TestUser:
 
     def __init__(self):
-        username = 'user1'
-        password = 'supersecret'
+        self.user_id = 1
+        self.username = 'user1'
+        self.password = 'supersecret'
+        self.balance = 0

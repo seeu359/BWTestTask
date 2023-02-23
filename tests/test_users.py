@@ -13,7 +13,7 @@ client = TestClient(app)
 app.dependency_overrides[get_session] = get_mock_session
 
 
-def test_create_user(db_service):
+def test_create_user():
 
     response1 = client.post(
         '/users/create',
