@@ -18,11 +18,11 @@ class Settings(BaseSettings):
     LOGGER_FORMAT: str = '{time:YYYY.MM.DD - HH:mm:ss} - {level} - {message}'
     algorithm: str = 'HS256'
     expiration: int = 24
-    DB_HOST: str
-    DB_PORT: str
-    DB_NAME: str
-    DB_USER: str
-    DB_PASS: str
+    DB_HOST: str | None
+    DB_PORT: str | None
+    DB_NAME: str | None
+    DB_USER: str | None
+    DB_PASS: str | None
     DATABASE_URL: str
     TEST_DATABASE_URL: str = 'sqlite:///' + os.path.join(
         str(BASE_DIR) + '/tests/test_db.sqlite3'

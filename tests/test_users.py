@@ -41,4 +41,3 @@ def test_create_user():
     assert response1.status_code == status.HTTP_201_CREATED
     assert response2.status_code == status.HTTP_201_CREATED
     assert response_409.status_code == status.HTTP_409_CONFLICT
-
