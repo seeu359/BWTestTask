@@ -1,3 +1,7 @@
+[![code-check](https://github.com/seeu359/BWTestTask/actions/workflows/linter_and_tests_check.yaml/badge.svg)](https://github.com/seeu359/BWTestTask/actions/workflows/linter_and_tests_check.yaml)
+
+---
+
 ### Installation
 1. Clone repo: $ git clone https://github.com/seeu359/BWTestTask.git
 
