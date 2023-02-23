@@ -4,21 +4,17 @@ from pydantic import BaseModel, Field
 
 
 class BaseUser(BaseModel):
-
     username: str
 
 
 class User(BaseUser):
-
     user_id: int
 
     class Config:
-
         orm_mode = True
 
 
 class CreateUser(BaseUser):
-
     password: str
 
 
@@ -29,7 +25,6 @@ class Token(BaseModel):
 
 
 class Balance(BaseModel):
-
     user_id: int
     balance: float
 

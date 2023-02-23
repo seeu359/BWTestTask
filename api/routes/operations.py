@@ -1,48 +1,17 @@
 from fastapi import APIRouter, Body, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 
 from api import get_current_user
 from api.services.operations import Operations
 from api.services.transactions import Transactions
-from api.services.users import UserServices
 from models import schemes
 
-router = APIRouter(
+operations_router = APIRouter(
     prefix='/users',
-    tags=['Users'],
+    tags=['Operations']
 )
 
 
-@router.post(
-    path='/create',
-    response_model=schemes.Token,
-    status_code=status.HTTP_201_CREATED
-)
-async def create_user(
-        user_data: schemes.CreateUser,
-        user_services: UserServices = Depends()
-) -> schemes.Token:
-
-    return user_services.create_user(user_data)
-
-
-@router.post(
-    path='/login',
-    response_model=schemes.Token,
-    status_code=status.HTTP_200_OK,
-)
-async def login_user(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    user_service: UserServices = Depends(),
-) -> schemes.Token:
-
-    return user_service.authenticate_user(
-        form_data.username,
-        form_data.password,
-    )
-
-
-@router.get(
+@operations_router.get(
     path='/balance',
     response_model=schemes.Balance,
     status_code=status.HTTP_200_OK,
@@ -54,7 +23,7 @@ async def get_user_balance(
     return transactions.get_balance(user.user_id)
 
 
-@router.patch(
+@operations_router.patch(
     path='/balance/payin',
     status_code=status.HTTP_200_OK,
 )
@@ -73,7 +42,7 @@ async def pay_in(
     return balance
 
 
-@router.post(
+@operations_router.post(
     path='/transfer',
     status_code=status.HTTP_200_OK,
     response_model=schemes.Transfer
@@ -98,7 +67,7 @@ async def transfer(
         operations.add_operations(user.user_id, body, exc=exc)
 
 
-@router.post(
+@operations_router.post(
     path='/balance/payout',
     status_code=status.HTTP_200_OK,
     response_model=schemes.Balance,

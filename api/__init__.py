@@ -1,6 +1,7 @@
 from enum import Enum
 
-from api.services.users import get_current_user, get_user
+from api.services.auth import get_current_user
+from api.services.users import get_user
 
 
 class OperationStatuses(Enum):

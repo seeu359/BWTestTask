@@ -18,19 +18,17 @@ class Operations:
 
     def add_operations(self, user_id: int, body: dict, exc=None) -> None:
         if exc is None:
-            self.__add_operations(
-                user_id, body,
-                status=OperationStatuses.SUCCEEDED.value,
-            )
+            self.__add_operations(user_id,
+                                  body,
+                                  status=OperationStatuses.SUCCEEDED.value)
             return
 
         logger.info(
             f'Exc details - {exc.detail}, exc status code - {exc.status_code}'
         )
-        self.__add_operations(
-            user_id, body,
-            status=OperationStatuses.FAILED.value,
-        )
+        self.__add_operations(user_id,
+                              body,
+                              status=OperationStatuses.FAILED.value)
         raise NotEnoughMoneyError(status_code=exc.status_code,
                                   detail=exc.detail)
 

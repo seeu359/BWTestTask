@@ -15,7 +15,7 @@ class BaseTransactions:
         )
 
     @staticmethod
-    def check_enough_money(balance: int, payout_amount: int):
+    def check_money_amount(balance: int, payout_amount: int):
         if balance < payout_amount:
             raise HTTPException(
                 status_code=status.HTTP_402_PAYMENT_REQUIRED,
@@ -37,14 +37,14 @@ class Transactions(BaseTransactions):
     def pay_out(self, user_id: int, body: dict) -> schemes.Balance:
         data = schemes.PayOut(**body)
         user = get_user(self.session, user_id)
-        self.check_enough_money(user.balance, data.amount)
+        self.check_money_amount(user.balance, data.amount)
         user.balance -= data.amount
         return schemes.Balance(user_id=user_id, balance=user.balance)
 
     def transfer(self, user_id, body) -> schemes.Transfer:
         data = schemes.Transfer(**body)
         user = get_user(self.session, user_id)
-        self.check_enough_money(user.balance, data.amount)
+        self.check_money_amount(user.balance, data.amount)
 
         user2 = get_user(self.session, data.accountToId)
         if user2 is None:
