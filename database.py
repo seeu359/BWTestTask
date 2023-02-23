@@ -21,7 +21,7 @@ def get_session():
     session = Session()
     try:
         yield session
-    except:
+    except: # noqa E722
         session.rollback()
     else:
         session.commit()
