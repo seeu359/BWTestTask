@@ -22,6 +22,7 @@ def get_mock_session():
 
 
 class TestUser:
+    __test__ = False
 
     def __init__(self):
         self.user_id = 1

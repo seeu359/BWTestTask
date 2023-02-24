@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import Union
 
 from dotenv import load_dotenv
 from loguru import logger
@@ -18,11 +19,11 @@ class Settings(BaseSettings):
     LOGGER_FORMAT: str = '{time:YYYY.MM.DD - HH:mm:ss} - {level} - {message}'
     algorithm: str = 'HS256'
     expiration: int = 24
-    DB_HOST: str | None
-    DB_PORT: str | None
-    DB_NAME: str | None
-    DB_USER: str | None
-    DB_PASS: str | None
+    DB_HOST: Union[str, None]
+    DB_PORT: Union[str, None]
+    DB_NAME: Union[str, None]
+    DB_USER: Union[str, None]
+    DB_PASS: Union[str, None]
     DATABASE_URL: str
     TEST_DATABASE_URL: str = 'sqlite:///' + os.path.join(
         str(BASE_DIR) + '/tests/test_db.sqlite3'

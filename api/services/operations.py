@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException
 from loguru import logger
 
-from api import OperationStatuses
+from api import OperationStatus
 from database import Session, get_session
 from models.orm_models import Operations as _Operations
 
@@ -20,7 +20,7 @@ class Operations:
         if exc is None:
             self.__add_operations(user_id,
                                   body,
-                                  status=OperationStatuses.SUCCEEDED.value)
+                                  status=OperationStatus.SUCCEEDED.value)
             return
 
         logger.info(
@@ -28,7 +28,7 @@ class Operations:
         )
         self.__add_operations(user_id,
                               body,
-                              status=OperationStatuses.FAILED.value)
+                              status=OperationStatus.FAILED.value)
         raise NotEnoughMoneyError(status_code=exc.status_code,
                                   detail=exc.detail)
 

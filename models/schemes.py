@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Union
 
 from pydantic import BaseModel, Field
 
@@ -30,7 +30,7 @@ class Balance(BaseModel):
 
 
 class Operations(BaseModel):
-    amount: int | float = Field(None, gt=0)
+    amount: Union[int, float] = Field(None, gt=0)
 
 
 class PayIn(Operations):
@@ -42,6 +42,6 @@ class PayOut(Operations):
 
 
 class Transfer(Operations):
-    author_id: int | None
+    author_id: Union[int, float]
     accountToId: int
     type: Literal['transfer']
