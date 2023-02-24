@@ -42,6 +42,6 @@ class PayOut(Operations):
 
 
 class Transfer(Operations):
-    author_id: Union[int, float]
+    author_id: Union[int, float] = None
     accountToId: int
     type: Literal['transfer']
