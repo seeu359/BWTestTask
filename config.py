@@ -8,8 +8,6 @@ from pydantic import BaseSettings
 
 load_dotenv()
 
-LOGGER_FORMAT = '{time:YYYY.MM.DD - HH:mm:ss} - {level} - {message}'
-
 
 class Settings(BaseSettings):
 
@@ -33,6 +31,8 @@ class Settings(BaseSettings):
 
 
 settings = Settings(_env_file='.env', _env_file_encoding='utf-8')
+
+LOGGER_FORMAT = '{time:YYYY.MM.DD - HH:mm:ss} - {level} - {message}'
 
 LOGGER = logger.add(
     sink=settings.PATH_TO_LOGS,

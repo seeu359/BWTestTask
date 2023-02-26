@@ -25,7 +25,6 @@ migration:
 head:
 	docker exec api alembic upgrade head
 
-
 rm:
 	docker stop api
 	docker stop postgres_db
