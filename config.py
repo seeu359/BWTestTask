@@ -24,7 +24,6 @@ class Settings(BaseSettings):
     POSTGRES_DB: Union[str, None]
     POSTGRES_USER: Union[str, None]
     POSTGRES_PASSWORD: Union[str, None]
-    DATABASE_URL: str
     TEST_DATABASE_URL: str = 'sqlite:///' + os.path.join(
         str(BASE_DIR) + '/tests/test_db.sqlite3'
     )
