@@ -11,11 +11,11 @@ from models.orm_models import Base
 config = context.config
 
 section = config.config_ini_section
-config.set_section_option(section, 'DB_HOST', settings.DB_HOST)
-config.set_section_option(section, 'DB_PORT', settings.DB_PORT)
-config.set_section_option(section, 'DB_NAME', settings.DB_NAME)
-config.set_section_option(section, 'DB_PASS', settings.DB_PASS)
-config.set_section_option(section, 'DB_USER', settings.DB_USER)
+config.set_section_option(section, 'POSTGRES_HOST', settings.POSTGRES_HOST)
+config.set_section_option(section, 'POSTGRES_PORT', settings.POSTGRES_PORT)
+config.set_section_option(section, 'POSTGRES_DB', settings.POSTGRES_DB)
+config.set_section_option(section, 'POSTGRES_PASSWORD', settings.POSTGRES_PASSWORD)
+config.set_section_option(section, 'POSTGRES_USER', settings.POSTGRES_USER)
 
 
 # Interpret the config file for Python logging.

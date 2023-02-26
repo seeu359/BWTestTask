@@ -2,9 +2,8 @@ from datetime import datetime
 from enum import Enum as _Enum
 
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
-from sqlalchemy.orm import declarative_base, mapped_column
-
-Base = declarative_base()
+from sqlalchemy.orm import mapped_column
+from database import Base
 
 
 class OperationStatus(_Enum):
@@ -20,7 +19,6 @@ class OperationType(_Enum):
 
 
 class User(Base):
-
     __tablename__ = 'user'
 
     user_id = Column(Integer, primary_key=True, autoincrement=True)

@@ -19,11 +19,11 @@ class Settings(BaseSettings):
     LOGGER_FORMAT: str = '{time:YYYY.MM.DD - HH:mm:ss} - {level} - {message}'
     algorithm: str = 'HS256'
     expiration: int = 24
-    DB_HOST: Union[str, None]
-    DB_PORT: Union[str, None]
-    DB_NAME: Union[str, None]
-    DB_USER: Union[str, None]
-    DB_PASS: Union[str, None]
+    POSTGRES_HOST: Union[str, None]
+    POSTGRES_PORT: Union[str, None]
+    POSTGRES_DB: Union[str, None]
+    POSTGRES_USER: Union[str, None]
+    POSTGRES_PASSWORD: Union[str, None]
     DATABASE_URL: str
     TEST_DATABASE_URL: str = 'sqlite:///' + os.path.join(
         str(BASE_DIR) + '/tests/test_db.sqlite3'
