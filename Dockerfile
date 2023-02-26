@@ -11,4 +11,4 @@ COPY . /bw_api
 
 WORKDIR /bw_api
 
-CMD uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000 && alembic revision --autogenerate && alembic upgrade head
+CMD uvicorn main:app --reload --workers 1 --host 0.0.0.0 --port 8000
